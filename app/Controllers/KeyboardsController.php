@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Domain\Models\KeyboardsModel;
+use App\Exceptions\HttpPaginationException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
@@ -12,13 +13,19 @@ class KeyboardsController extends BaseController
 
     public function handleGetKeyboards(Request $request, Response $response): Response
     {
-        $keyboards = $this->keyboards_model->getKeyboards();
+        $filters = $request->getQueryParams();
 
-        $payload = json_encode($keyboards);
+        $current_page = !empty($filters['page']) ? $filters['page'] : 1;
+        $records_per_page = !empty($filters['limit']) ? $filters['limit'] : 10;
 
-        $response->getBody()->write($payload);
+        if (!is_numeric($current_page) || !is_numeric($records_per_page)) {
+            throw new HttpPaginationException($request);
+        }
 
-        return $response->withHeader(HEADERS_CONTENT_TYPE, APP_MEDIA_TYPE_JSON);
+        $this->keyboards_model->setPaginationOptions($current_page, $records_per_page);
+
+        $keyboards = $this->keyboards_model->getKeyboards($filters, $request);
+        return $this->renderJson($response, $keyboards);
     }
 
     /**

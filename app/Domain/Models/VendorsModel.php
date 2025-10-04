@@ -4,7 +4,10 @@
 
 namespace App\Domain\Models;
 
+use App\Exceptions\HttpInvalidParameterException;
+use App\Exceptions\HttpRangeFilterException;
 use App\Helpers\Core\PDOService;
+use Psr\Http\Message\ServerRequestInterface as Request;
 
 class VendorsModel extends BaseModel
 {
@@ -13,8 +16,15 @@ class VendorsModel extends BaseModel
         parent::__construct($pdo);
     }
 
-    public function getVendors(array $filters): array // using "array" as the datatype is called "hint typing"
+    public function getVendors(array $filters, Request $request): array // using "array" as the datatype is called "hint typing"
     {
+        // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
+        $valid_filters = ['name', 'country', 'founded_after', 'founded_before', 'keyboards_count', 'lower_price_limit', 'upper_price_limit'];
+        $invalid_filters = array_diff(array_keys($filters), $valid_filters);
+        if (!empty($invalid_filters)) {
+            throw new HttpInvalidParameterException($request);
+        }
+
         $args = [];
         $sql = " SELECT DISTINCT vendors.* FROM vendors LEFT JOIN keyboards ON keyboards.vendor_id = vendors.vendor_id WHERE 1 ";
 
@@ -40,14 +50,15 @@ class VendorsModel extends BaseModel
         }
         if (!empty($filters['lower_price_limit'])) {
             if (empty($filters['upper_price_limit'])) {
-                // throw error
+                // Using a lower price limit requires an upper price limit
+                throw new HttpRangeFilterException($request);
             }
             $sql .= " AND keyboards.price BETWEEN :lower_limit AND :upper_limit GROUP BY vendors.vendor_id ";
             $args['lower_limit'] = $filters['lower_price_limit'];
             $args['upper_limit'] = $filters['upper_price_limit'];
-        }
-        if (!empty($filters['upper_price_limit'])) {
-            // throw error
+        } else if (!empty($filters['upper_price_limit'])) {
+            // Using an upper price limit requires a lower price limit
+            throw new HttpRangeFilterException($request);
         }
 
         return $this->paginate($sql, $args);

@@ -3,6 +3,8 @@
 namespace App\Controllers;
 
 use App\Domain\Models\VendorsModel;
+use App\Exceptions\HttpInvalidIdException;
+use App\Exceptions\HttpPaginationException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Exception\HttpNotFoundException;
@@ -20,24 +22,13 @@ class VendorsController extends BaseController
         $records_per_page = !empty($filters['limit']) ? $filters['limit'] : 10;
 
         if (!is_numeric($current_page) || !is_numeric($records_per_page)) {
-            $payload = [
-                "status" => "error",
-                "code" => 404,
-                "message" => "Pagination options must be integers."
-            ];
-
-            return $this->renderJson(
-                $response,
-                $payload,
-                404
-            );
+            throw new HttpPaginationException($request);
         }
 
         $this->vendors_model->setPaginationOptions($current_page, $records_per_page);
 
-        $vendors = $this->vendors_model->getVendors($filters);
+        $vendors = $this->vendors_model->getVendors($filters, $request);
         return $this->renderJson($response, $vendors);
-        // return $response->withHeader('Content-Type', 'application/json');
     }
 
     /**
@@ -53,28 +44,9 @@ class VendorsController extends BaseController
 
         // If the ID is invalid, return error 404
         if ($vendor === false) {
-            $payload = [
-                "status" => "error",
-                "code" => 404,
-                "message" => "There was no record matching the supplied vendor ID..."
-            ];
-
-            return $this->renderJson(
-                $response,
-                $payload,
-                404
-            );
+            throw new HttpInvalidIdException($request);
         }
 
         return $this->renderJson($response, $vendor);
-    }
-
-    private function verifyFilterParams($page = 1, $limit = 10)
-    {
-        if (is_int($page) && is_int($limit)) {
-            return true;
-        }
-
-        return false;
     }
 }

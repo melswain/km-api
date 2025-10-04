@@ -2,7 +2,12 @@
 
 namespace App\Domain\Models;
 
+use App\Exceptions\HttpInvalidDateException;
+use App\Exceptions\HttpInvalidParameterException;
+use App\Exceptions\HttpRangeFilterException;
 use App\Helpers\Core\PDOService;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Slim\Exception\HttpBadRequestException;
 
 class KeyboardsModel extends BaseModel
 {
@@ -11,10 +16,62 @@ class KeyboardsModel extends BaseModel
         parent::__construct($pdo);
     }
 
-    public function getKeyboards(): array
+    public function getKeyboards(array $filters, Request $request): array
     {
-        $sql = "SELECT * FROM keyboards";
-        return $this->fetchAll($sql);
+        // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
+        $valid_filters = ['name', 'connectivity', 'switch_type', 'hotswappable', 'weight_maximum', 'released_before', 'released_after', 'firmware_type'];
+        $invalid_filters = array_diff(array_keys($filters), $valid_filters);
+        if (!empty($invalid_filters)) {
+            throw new HttpInvalidParameterException($request);
+        }
+
+        $args = [];
+        $sql = " SELECT * FROM keyboards JOIN switches ON keyboards.switch_id = switches.switch_id JOIN pcbs ON keyboards.keyboard_id = pcbs.keyboard_id WHERE 1 ";
+
+        if (!empty($filters['name'])) {
+            $sql .= " AND keyboards.name LIKE CONCAT('%', :keyboards_name, '%') ";
+            $args['keyboards_name'] = $filters['name'];
+        }
+        if (!empty($filters['connectivity'])) {
+            $sql .= " AND connectivity LIKE CONCAT('%', :keyboards_connectivity, '%') ";
+            $args['keyboards_connectivity'] = $filters['connectivity'];
+        }
+        if (!empty($filters['switch_type'])) {
+            $sql .= " AND switches.name LIKE CONCAT('%', :switch_type, '%') ";
+            $args['switch_type'] = $filters['switch_type'];
+        }
+        if (!empty($filters['hotswappable'])) {
+            // Input either true or false, and it will search using boolean integers (0 or 1)
+            // https://www.php.net/manual/en/filter.constants
+            $hotSwappable = filter_var($filters['hotswappable'], FILTER_VALIDATE_BOOLEAN);
+            $sql .= " AND keyboards.hot_swappable = :hot_swappable ";
+            $args['hot_swappable'] = $hotSwappable ? 1 : 0;
+        }
+        if (!empty($filters['weight_maximum'])) {
+            $sql .= " AND keyboards.weight <= :keyboards_weight_maximum ";
+            $args['keyboards_weight_maximum'] = $filters['weight_maximum'];
+        }
+        if (!empty($filters['released_after'])) {
+            if (empty($filters['released_before'])) {
+                throw new HttpRangeFilterException($request);
+            }
+
+            if ($this->validateDate($filters['released_after']) && $this->validateDate($filters['released_before'])) {
+                $sql .= " AND keyboards.release_date BETWEEN :keyboards_released_after AND :keyboards_released_before ";
+                $args['keyboards_released_before'] = $filters['released_before'];
+                $args['keyboards_released_after'] = $filters['released_after'];
+            } else {
+                throw new HttpInvalidDateException($request);
+            }
+        } else if (!empty($filters['released_before'])) {
+            throw new HttpRangeFilterException($request);
+        }
+        if (!empty($filters['firmware_type'])) {
+            $sql .= " AND pcbs.firmware LIKE CONCAT('%', :keyboards_firmware_type, '%') ";
+            $args['keyboards_firmware_type'] = $filters['firmware_type'];
+        }
+
+        return $this->paginate($sql, $args);
     }
 
     public function findKeyboardById(int $keyboard_id): mixed

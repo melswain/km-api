@@ -7,6 +7,7 @@ namespace App\Domain\Models;
 use App\Helpers\PaginationHelper;
 use PDO;
 use App\Helpers\Core\PDOService;
+use DateTime;
 use Exception;
 
 /**
@@ -347,5 +348,10 @@ abstract class BaseModel
     {
         $this->current_page = $current_page;
         $this->records_per_page = $records_per_page;
+    }
+
+    public function validateDate($date, $format = 'Y-m-d') {
+        $dt = DateTime::createFromFormat($format, $date);
+        return $dt && strtolower($dt->format($format)) === strtolower($date);
     }
 }
