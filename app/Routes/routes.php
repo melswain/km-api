@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AboutController;
 use App\Controllers\KeyboardsController;
+use App\Controllers\LayoutsController;
 use App\Controllers\MiceController;
 use App\Controllers\VendorsController;
 use App\Helpers\DateTimeHelper;
@@ -54,4 +55,11 @@ return static function (Slim\App $app): void {
     $app->get('/mice/{mouse_id}', [MiceController::class, 'handleGetMouseById']);
     // ROUTE: GET /mice/{mouse_id}/buttons get buttons from mouse
     $app->get('/mice/{mouse_id}/buttons', [MiceController::class, 'handleGetButtonMouseById']);
+
+    // ROUTE: GET /layouts get list of layouts
+    $app->get('/layouts', [LayoutsController::class, 'handleGetLayouts']);
+    // ROUTE: GET /layouts{layout_id} get layout by id
+    $app->get('/layouts/{layout_id}', [LayoutsController::class, 'handleGetLayoutsById']);
+    // Route: GET /layouts/{layout_id}/keyboards get all keyboards belonging to layout id
+    $app->get('/layouts/{layout_id}/keyboards', [LayoutsController::class, 'handleGetKeyboardLayoutById']);
 };

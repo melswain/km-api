@@ -93,4 +93,52 @@ class KeyboardsModel extends BaseModel
 
         return $keyboard;
     }
+
+    public function findKeyboardByLayoutId(int $layout_id, array $filters, Request $request): array
+    {
+        // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
+        $valid_filters = ['switch_type', 'lower_price_limit', 'upper_price_limit', 'connectivity'];
+        $invalid_filters = array_diff(array_keys($filters), $valid_filters);
+        if (!empty($invalid_filters)) {
+            throw new HttpInvalidParameterException($request);
+        }
+
+        $args = [];
+        $sql = " SELECT * FROM keyboards JOIN switches ON keyboards.switch_id = switches.switch_id WHERE layout_id = :layout_id ";
+        $args['layout_id'] = $layout_id;
+
+        if (!empty($filters['switch_type'])) {
+            $sql .= " AND switches.name LIKE CONCAT('%', :switch_type, '%') ";
+            $args['switch_type'] = $filters['switch_type'];
+        }
+        if (!empty($filters['lower_price_limit'])) {
+            if (empty($filters['upper_price_limit'])) {
+                // Using a lower price limit requires an upper price limit
+                throw new HttpRangeFilterException($request);
+            }
+
+            if (is_numeric($filters['lower_price_limit']) && is_numeric($filters['upper_price_limit'])) {
+                $sql .= " AND keyboards.price BETWEEN :lower_limit AND :upper_limit ";
+                $args['lower_limit'] = $filters['lower_price_limit'];
+                $args['upper_limit'] = $filters['upper_price_limit'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
+        } else if (!empty($filters['upper_price_limit'])) {
+            // Using an upper price limit requires a lower price limit
+            throw new HttpRangeFilterException($request);
+        }
+        if (!empty($filters['connectivity'])) {
+            // make sure that the connectivity type is either wired, wireless, or both
+            $allowedConnectivity = ['wired', 'wireless', 'both'];
+            if (!in_array($filters['connectivity'], $allowedConnectivity, true)) {
+                throw new HttpInvalidParameterValueException($request);
+            }
+
+            $sql .= " AND keyboards.connectivity LIKE CONCAT('%', :keyboards_connectivity, '%') ";
+            $args['keyboards_connectivity'] = $filters['connectivity'];
+        }
+
+        return $this->paginate($sql, $args);
+    }
 }
