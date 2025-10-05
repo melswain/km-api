@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Controllers\AboutController;
 use App\Controllers\KeyboardsController;
+use App\Controllers\MiceController;
 use App\Controllers\VendorsController;
 use App\Helpers\DateTimeHelper;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -40,8 +41,14 @@ return static function (Slim\App $app): void {
     $app->get('/vendors', [VendorsController::class, 'handleGetVendors']);
     // ROUTE: GET /vendors/{vendors_id} get vendor by id
     $app->get('/vendors/{vendors_id}', [VendorsController::class, 'handleGetVendorsById']);
+
     // ROUTE: GET /keyboards get list of keyboards
     $app->get('/keyboards', [KeyboardsController::class, 'handleGetKeyboards']);
     // ROUTE: GET /keyboards/{keyboard_id} get keyboard by id
     $app->get('/keyboards/{keyboard_id}', [KeyboardsController::class, 'handleGetKeyboardsById']);
+
+    // ROUTE: GET /mice get list of mice
+    $app->get('/mice', [MiceController::class, 'handleGetMice']);
+    // ROUTE: GET /mice/{mouse_id} get mouse by id
+    $app->get('/mice/{mouse_id}', [MiceController::class, 'handleGetMiceById']);
 };

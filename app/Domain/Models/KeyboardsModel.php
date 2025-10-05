@@ -4,6 +4,7 @@ namespace App\Domain\Models;
 
 use App\Exceptions\HttpInvalidDateException;
 use App\Exceptions\HttpInvalidParameterException;
+use App\Exceptions\HttpInvalidParameterValueException;
 use App\Exceptions\HttpRangeFilterException;
 use App\Helpers\Core\PDOService;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -33,7 +34,13 @@ class KeyboardsModel extends BaseModel
             $args['keyboards_name'] = $filters['name'];
         }
         if (!empty($filters['connectivity'])) {
-            $sql .= " AND connectivity LIKE CONCAT('%', :keyboards_connectivity, '%') ";
+            // make sure that the connectivity type is either wired, wireless, or both
+            $allowedConnectivity = ['wired', 'wireless', 'both'];
+            if (!in_array($filters['connectivity'], $allowedConnectivity, true)) {
+                throw new HttpInvalidParameterValueException($request);
+            }
+
+            $sql .= " AND keyboards.connectivity LIKE CONCAT('%', :keyboards_connectivity, '%') ";
             $args['keyboards_connectivity'] = $filters['connectivity'];
         }
         if (!empty($filters['switch_type'])) {
@@ -44,6 +51,7 @@ class KeyboardsModel extends BaseModel
             // Input either true or false, and it will search using boolean integers (0 or 1)
             // https://www.php.net/manual/en/filter.constants
             $hotSwappable = filter_var($filters['hotswappable'], FILTER_VALIDATE_BOOLEAN);
+
             $sql .= " AND keyboards.hot_swappable = :hot_swappable ";
             $args['hot_swappable'] = $hotSwappable ? 1 : 0;
         }

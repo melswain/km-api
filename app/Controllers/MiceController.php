@@ -2,17 +2,17 @@
 
 namespace App\Controllers;
 
-use App\Domain\Models\KeyboardsModel;
+use App\Domain\Models\MiceModel;
 use App\Exceptions\HttpInvalidIdException;
 use App\Exceptions\HttpPaginationException;
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 
-class KeyboardsController extends BaseController
+class MiceController extends BaseController
 {
-    public function __construct(private KeyboardsModel $keyboards_model) {}
+    public function __construct(private MiceModel $mice_model) {}
 
-    public function handleGetKeyboards(Request $request, Response $response): Response
+    public function handleGetMice(Request $request, Response $response): Response
     {
         $filters = $request->getQueryParams();
 
@@ -23,27 +23,27 @@ class KeyboardsController extends BaseController
             throw new HttpPaginationException($request);
         }
 
-        $this->keyboards_model->setPaginationOptions($current_page, $records_per_page);
+        $this->mice_model->setPaginationOptions($current_page, $records_per_page);
 
-        $keyboards = $this->keyboards_model->getKeyboards($filters, $request);
+        $keyboards = $this->mice_model->getMice($filters, $request);
         return $this->renderJson($response, $keyboards);
     }
 
     /**
-     * Route to get a keyboard by its id (GET /keyboards/{keyboard_id})
+     * Route to get a mouse by its id (GET /mice/{mouse_id})
      * @param \Psr\Http\Message\ServerRequestInterface $request
      * @param \Psr\Http\Message\ResponseInterface $response
      * @return void
      */
-    public function handleGetKeyboardsById(Request $request, Response $response, array $uri_args): Response
+    public function handleGetMiceById(Request $request, Response $response, array $uri_args): Response
     {
-        $keyboard_id = $uri_args["keyboard_id"];
-        $keyboard = $this->keyboards_model->findKeyboardById($keyboard_id);
+        $mouse_id = $uri_args['mouse_id'];
+        $mouse = $this->mice_model->findMouseById($mouse_id);
 
-        if ($keyboard === false) {
+        if ($mouse === false) {
             throw new HttpInvalidIdException($request);
         }
 
-        return $this->renderJson($response, $keyboard);
+        return $this->renderJson($response, $mouse);
     }
 }
