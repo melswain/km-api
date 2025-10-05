@@ -35,7 +35,7 @@ class KeyboardsController extends BaseController
      * @param \Psr\Http\Message\ResponseInterface $response
      * @return void
      */
-    public function handleGetKeyboardsById(Request $request, Response $response, array $uri_args): Response
+    public function handleGetKeyboardById(Request $request, Response $response, array $uri_args): Response
     {
         $keyboard_id = $uri_args["keyboard_id"];
         $keyboard = $this->keyboards_model->findKeyboardById($keyboard_id);

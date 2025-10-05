@@ -5,6 +5,7 @@
 namespace App\Domain\Models;
 
 use App\Exceptions\HttpInvalidParameterException;
+use App\Exceptions\HttpInvalidParameterValueException;
 use App\Exceptions\HttpRangeFilterException;
 use App\Helpers\Core\PDOService;
 use Psr\Http\Message\ServerRequestInterface as Request;
@@ -37,25 +38,42 @@ class VendorsModel extends BaseModel
             $args['vendors_country'] = $filters['country'];
         }
         if (!empty($filters['founded_after'])) {
-            $sql .= " AND founded_year > :vendors_founded_after ";
-            $args["vendors_founded_after"] = $filters['founded_after'];
+            if ($this->validateYear($filters['founded_after'])) {
+                $sql .= " AND founded_year > :vendors_founded_after ";
+                $args["vendors_founded_after"] = $filters['founded_after'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
         }
         if (!empty($filters['founded_before'])) {
-            $sql .= " AND founded_year < :vendors_founded_before ";
-            $args["vendors_founded_before"] = $filters['founded_before'];
+            if ($this->validateYear($filters['founded_after'])) {
+                $sql .= " AND founded_year < :vendors_founded_before ";
+                $args["vendors_founded_before"] = $filters['founded_before'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
         }
         if (!empty($filters['keyboards_count'])) {
-            $sql .= " GROUP BY vendors.vendor_id HAVING COUNT(keyboards.keyboard_id) >= :count";
-            $args['count'] = $filters['keyboards_count'];
+            if (is_numeric($filters['keyboards_count'])) {
+                $sql .= " GROUP BY vendors.vendor_id HAVING COUNT(keyboards.keyboard_id) >= :count";
+                $args['count'] = $filters['keyboards_count'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
         }
         if (!empty($filters['lower_price_limit'])) {
             if (empty($filters['upper_price_limit'])) {
                 // Using a lower price limit requires an upper price limit
                 throw new HttpRangeFilterException($request);
             }
-            $sql .= " AND keyboards.price BETWEEN :lower_limit AND :upper_limit GROUP BY vendors.vendor_id ";
-            $args['lower_limit'] = $filters['lower_price_limit'];
-            $args['upper_limit'] = $filters['upper_price_limit'];
+
+            if (is_numeric($filters['lower_price_limit']) && is_numeric($filters['upper_price_limit'])) {
+                $sql .= " AND keyboards.price BETWEEN :lower_limit AND :upper_limit GROUP BY vendors.vendor_id ";
+                $args['lower_limit'] = $filters['lower_price_limit'];
+                $args['upper_limit'] = $filters['upper_price_limit'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
         } else if (!empty($filters['upper_price_limit'])) {
             // Using an upper price limit requires a lower price limit
             throw new HttpRangeFilterException($request);

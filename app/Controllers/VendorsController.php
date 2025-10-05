@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Domain\Models\VendorsModel;
+use App\Domain\Models\SwitchesModel;
 use App\Exceptions\HttpInvalidIdException;
 use App\Exceptions\HttpPaginationException;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -11,7 +12,7 @@ use Slim\Exception\HttpNotFoundException;
 
 class VendorsController extends BaseController
 {
-    public function __construct(private VendorsModel $vendors_model) {}
+    public function __construct(private VendorsModel $vendors_model, private SwitchesModel $switches_model) {}
 
     public function handleGetVendors(Request $request, Response $response): Response
     {
@@ -37,9 +38,9 @@ class VendorsController extends BaseController
      * @param \Psr\Http\Message\ResponseInterface $response
      * @return void
      */
-    public function handleGetVendorsById(Request $request, Response $response, array $uri_args): Response
+    public function handleGetVendorById(Request $request, Response $response, array $uri_args): Response
     {
-        $vendor_id = $uri_args["vendors_id"];
+        $vendor_id = $uri_args["vendor_id"];
         $vendor = $this->vendors_model->findVendorById($vendor_id);
 
         // If the ID is invalid, return error 404
@@ -48,5 +49,22 @@ class VendorsController extends BaseController
         }
 
         return $this->renderJson($response, $vendor);
+    }
+
+    public function handleGetSwitchVendorById(Request $request, Response $response, array $uri_args): Response
+    {
+        $vendor_id = $uri_args['vendor_id'];
+        $filters = $request->getQueryParams();
+
+        // Validate vendor exists
+        $vendor = $this->vendors_model->findVendorById($vendor_id);
+        if ($vendor === false) {
+            throw new HttpInvalidIdException($request);
+        }
+
+        // Fetch switches for this vendor
+        $switches = $this->switches_model->findSwitchesByVendorId($vendor_id, $filters, $request);
+
+        return $this->renderJson($response, $switches);
     }
 }

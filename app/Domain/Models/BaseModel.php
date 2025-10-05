@@ -354,4 +354,11 @@ abstract class BaseModel
         $dt = DateTime::createFromFormat($format, $date);
         return $dt && strtolower($dt->format($format)) === strtolower($date);
     }
+
+    public function validateYear($year): bool {
+        return is_numeric($year) &&
+            strlen((string)$year) === 4 &&
+            $year >= 1900 &&
+            $year <= 2100;
+    }
 }

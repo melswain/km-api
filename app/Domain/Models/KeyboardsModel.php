@@ -56,8 +56,12 @@ class KeyboardsModel extends BaseModel
             $args['hot_swappable'] = $hotSwappable ? 1 : 0;
         }
         if (!empty($filters['weight_maximum'])) {
-            $sql .= " AND keyboards.weight <= :keyboards_weight_maximum ";
-            $args['keyboards_weight_maximum'] = $filters['weight_maximum'];
+            if (is_numeric($filters['weight_maximum'])) {
+                $sql .= " AND keyboards.weight <= :keyboards_weight_maximum ";
+                $args['keyboards_weight_maximum'] = $filters['weight_maximum'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
         }
         if (!empty($filters['released_after'])) {
             if (empty($filters['released_before'])) {

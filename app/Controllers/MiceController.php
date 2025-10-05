@@ -35,7 +35,7 @@ class MiceController extends BaseController
      * @param \Psr\Http\Message\ResponseInterface $response
      * @return void
      */
-    public function handleGetMiceById(Request $request, Response $response, array $uri_args): Response
+    public function handleGetMouseById(Request $request, Response $response, array $uri_args): Response
     {
         $mouse_id = $uri_args['mouse_id'];
         $mouse = $this->mice_model->findMouseById($mouse_id);

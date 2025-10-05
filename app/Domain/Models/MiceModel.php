@@ -73,9 +73,14 @@ class MiceModel extends BaseModel
                 // Using a lower price limit requires an upper price limit
                 throw new HttpRangeFilterException($request);
             }
-            $sql .= " AND mice.price BETWEEN :lower_limit AND :upper_limit ";
-            $args['lower_limit'] = $filters['lower_price_limit'];
-            $args['upper_limit'] = $filters['upper_price_limit'];
+
+            if (is_numeric($filters['lower_price_limit']) && is_numeric($filters['upper_price_limit'])) {
+                $sql .= " AND mice.price BETWEEN :lower_limit AND :upper_limit ";
+                $args['lower_limit'] = $filters['lower_price_limit'];
+                $args['upper_limit'] = $filters['upper_price_limit'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
         } else if (!empty($filters['upper_price_limit'])) {
             // Using an upper price limit requires a lower price limit
             throw new HttpRangeFilterException($request);
