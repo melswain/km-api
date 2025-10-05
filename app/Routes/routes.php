@@ -52,4 +52,6 @@ return static function (Slim\App $app): void {
     $app->get('/mice', [MiceController::class, 'handleGetMice']);
     // ROUTE: GET /mice/{mouse_id} get mouse by id
     $app->get('/mice/{mouse_id}', [MiceController::class, 'handleGetMouseById']);
+    // ROUTE: GET /mice/{mouse_id}/buttons get buttons from mouse
+    $app->get('/mice/{mouse_id}/buttons', [MiceController::class, 'handleGetButtonMouseById']);
 };

@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Domain\Models\ButtonsModel;
 use App\Domain\Models\MiceModel;
 use App\Exceptions\HttpInvalidIdException;
 use App\Exceptions\HttpPaginationException;
@@ -10,7 +11,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 class MiceController extends BaseController
 {
-    public function __construct(private MiceModel $mice_model) {}
+    public function __construct(private MiceModel $mice_model, private ButtonsModel $buttons_model) {}
 
     public function handleGetMice(Request $request, Response $response): Response
     {
@@ -45,5 +46,22 @@ class MiceController extends BaseController
         }
 
         return $this->renderJson($response, $mouse);
+    }
+
+    public function handleGetButtonMouseById(Request $request, Response $response, array $uri_args): Response
+    {
+        $mouse_id = $uri_args['mouse_id'];
+        $filters = $request->getQueryParams();
+
+        // Validate vendor exists
+        $vendor = $this->mice_model->findMouseById($mouse_id);
+        if ($vendor === false) {
+            throw new HttpInvalidIdException($request);
+        }
+
+        // Fetch switches for this vendor
+        $switches = $this->buttons_model->findButtonsByMouseId($mouse_id, $filters, $request);
+
+        return $this->renderJson($response, $switches);
     }
 }
