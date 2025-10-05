@@ -17,4 +17,48 @@ class KeycapsModel extends BaseModel
     {
         parent::__construct($pdo);
     }
+
+    public function findKeycapSetByLayoutId($layout_id, array $filters, Request $request): array
+    {
+        $valid_filters = ['name', 'material', 'profile', 'manufacturer', 'price_maximum'];
+        $invalid_filters = array_diff(array_keys($filters), $valid_filters);
+        if (!empty($invalid_filters)) {
+            throw new HttpInvalidParameterException($request);
+        }
+
+        $args = [];
+        $sql = " SELECT keycap_sets.* FROM keycap_sets
+                JOIN keycap_compatibility ON keycap_sets.keycap_id = keycap_compatibility.keycap_id
+                JOIN layouts ON keycap_compatibility.layout_id = layouts.layout_id
+                WHERE keycap_compatibility.layout_id = :layout_id ";
+        $args['layout_id'] = $layout_id;
+
+
+        if (!empty($filters['name'])) {
+            $sql .= " AND keycap_sets.name LIKE CONCAT('%', :keycap_name, '%') ";
+            $args['keycap_name'] = $filters['name'];
+        }
+        if (!empty($filters['material'])) {
+            $sql .= " AND keycap_sets.material LIKE CONCAT('%', :keycap_material, '%') ";
+            $args['keycap_material'] = $filters['material'];
+        }
+        if (!empty($filters['profile'])) {
+            $sql .= " AND keycap_sets.profile LIKE CONCAT('%', :keycap_profile, '%') ";
+            $args['keycap_profile'] = $filters['profile'];
+        }
+        if (!empty($filters['manufacturer'])) {
+            $sql .= " AND keycap_sets.manufacturer LIKE CONCAT('%', :kaycap_manufacturer, '%') ";
+            $args['keycap_manufacturer'] = $filters['manufacturer'];
+        }
+        if (!empty($filters['price_maximum'])) {
+            if (is_numeric($filters['price_maximum'])) {
+                $sql .= " AND keycap_sets.price <= :keycap_price ";
+                $args['keycap_price'] = $filters['price_maximum'];
+            } else {
+                throw new HttpInvalidParameterValueException($request);
+            }
+        }
+
+        return $this->paginate($sql, $args);
+    }
 }

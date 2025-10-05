@@ -62,4 +62,6 @@ return static function (Slim\App $app): void {
     $app->get('/layouts/{layout_id}', [LayoutsController::class, 'handleGetLayoutsById']);
     // Route: GET /layouts/{layout_id}/keyboards get all keyboards belonging to layout id
     $app->get('/layouts/{layout_id}/keyboards', [LayoutsController::class, 'handleGetKeyboardLayoutById']);
+    // Route: GET /layouts/{layout_id}/keycap-sets get all keycap sets belonging to layout id
+    $app->get('/layouts/{layout_id}/keycap-sets', [LayoutsController::class, 'handleGetKeycapSetLayoutById']);
 };

@@ -66,4 +66,21 @@ class LayoutsController extends BaseController
 
         return $this->renderJson($response, $keyboards);
     }
+
+    public function handleGetKeycapSetLayoutById(Request $request, Response $response, array $uri_args): Response
+    {
+        $layout_id = $uri_args['layout_id'];
+        $filters = $request->getQueryParams();
+
+        // Validate layout exists
+        $layout = $this->layouts_model->findLayoutById($layout_id);
+        if ($layout === false) {
+            throw new HttpInvalidIdException($request);
+        }
+
+        // Fetch switches for this vendor
+        $keycaps = $this->keycaps_model->findKeycapSetByLayoutId($layout_id, $filters, $request);
+
+        return $this->renderJson($response, $keycaps);
+    }
 }
