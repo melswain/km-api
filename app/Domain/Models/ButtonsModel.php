@@ -21,7 +21,7 @@ class ButtonsModel extends BaseModel
     public function findButtonsByMouseId(int $mouse_id, array $filters, Request $request): mixed
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['name', 'programmable', 'name_contains'];
+        $valid_filters = ['name', 'programmable'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);
@@ -31,16 +31,8 @@ class ButtonsModel extends BaseModel
         $sql = " SELECT * FROM mouse_buttons WHERE mouse_id = :mouse_id ";
         $args['mouse_id'] = $mouse_id;
 
-        // both 'name' and 'name_contains' cannot be used at the same time
-        if (!empty($filters['name_contains']) && !empty($filters['name'])) {
-            throw new HttpTooManyParametersException($request);
-        }
-        if (!empty($filters['name_contains'])) {
-            $sql .= " AND name LIKE CONCAT('%', :buttons_name, '%') ";
-            $args['buttons_name'] = $filters['name_contains'];
-        }
         if (!empty($filters['name'])) {
-            $sql .= " AND name = :buttons_name ";
+            $sql .= " AND name LIKE CONCAT('%', :buttons_name, '%') ";
             $args['buttons_name'] = $filters['name'];
         }
         if (!empty($filters['programmable'])) {

@@ -44,6 +44,12 @@ class KeyboardsModel extends BaseModel
             $args['keyboards_connectivity'] = $filters['connectivity'];
         }
         if (!empty($filters['switch_type'])) {
+            // make sure that the type is only linear, tactile, or clicky
+            $allowedTypes = ['linear', 'tactile', 'clicky'];
+            if (!in_array($filters['switch_type'], $allowedTypes, true)) {
+                throw new HttpInvalidParameterValueException($request);
+            }
+
             $sql .= " AND switches.name LIKE CONCAT('%', :switch_type, '%') ";
             $args['switch_type'] = $filters['switch_type'];
         }
@@ -79,6 +85,12 @@ class KeyboardsModel extends BaseModel
             throw new HttpRangeFilterException($request);
         }
         if (!empty($filters['firmware_type'])) {
+            // make sure that the type is only QMK or proprietary
+            $allowedTypes = ['QMK', 'proprietary'];
+            if (!in_array($filters['firmware_type'], $allowedTypes, true)) {
+                throw new HttpInvalidParameterValueException($request);
+            }
+
             $sql .= " AND pcbs.firmware LIKE CONCAT('%', :keyboards_firmware_type, '%') ";
             $args['keyboards_firmware_type'] = $filters['firmware_type'];
         }
