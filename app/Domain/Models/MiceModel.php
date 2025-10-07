@@ -35,7 +35,7 @@ class MiceModel extends BaseModel
         }
         if (!empty($filters['polling_rate'])) {
             // make sure that the polling rate is either 125, 500, or 1000 Hz
-            $allowedRate = ['125', '500', '100'];
+            $allowedRate = ['125', '500', '1000'];
             if (!in_array($filters['polling_rate'], $allowedRate, true)) {
                 throw new HttpInvalidParameterValueException($request);
             }

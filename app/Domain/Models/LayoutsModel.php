@@ -2,14 +2,9 @@
 
 namespace App\Domain\Models;
 
-use App\Exceptions\HttpInvalidDateException;
 use App\Exceptions\HttpInvalidParameterException;
-use App\Exceptions\HttpInvalidParameterValueException;
-use App\Exceptions\HttpRangeFilterException;
-use App\Exceptions\HttpTooManyParametersException;
 use App\Helpers\Core\PDOService;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Exception\HttpBadRequestException;
 
 class LayoutsModel extends BaseModel
 {

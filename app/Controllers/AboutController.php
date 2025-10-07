@@ -13,6 +13,13 @@ class AboutController extends BaseController
 
     private const API_VERSION = '1.0.0';
 
+    /**
+     * Displays information about the web service
+     * Includes all the exposed resources and what filters can be used on them
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @param \Psr\Http\Message\ResponseInterface $response the incoming server-side http response
+     * @return Response the encoded response to be sent to the user
+     */
     public function handleAboutWebService(Request $request, Response $response): Response
     {
 
@@ -52,18 +59,34 @@ class AboutController extends BaseController
                 ],
                 '/keyboards/{keyboard_id}' => 'Returns a single keyboard by its ID.',
                 '/mice' => [
-                    'polling_rate' => '',
-                    'connection' => '',
-                    'weight_minimum' => '',
-                    'weight_maximum' => '',
+                    'polling_rate' => 'Filter by the mice\'s polling rate. The provided value must be numeric and must be either 125, 500, or 1000.',
+                    'connection' => 'Filter by the mice\'s connectin type. Can either be wired, wireless, or both.',
+                    'weight_minimum' => 'Filter the keyboards by a minimum weight, in grams. Must also be accompanied by a corresponding weight maximum. The provided value must be numeric.',
+                    'weight_maximum' => 'Filter the keyboards by a maximum weight, in grams. Must also be accompanied by a corresponding weight minimum. The provided value must be numeric.',
                     'lower_price_limit' => 'Must also be accompanied by an upper_price_limit filter. Shows all vendors whose keyboards\'s prices exist between the provided prices. The provided value must be numerical.',
                     'upper_price_limit' => 'Must also be accompanied by a lower_price_limit filter. Shows all vendors whose keyboards\'s prices exist between the provided prices. The provided value must be numerical.',
-                    'button_count' => '',
-                    'rating' => ''
+                    'button_count' => 'Filters the mice by the amount of buttons they possess. This corresponds to their count of occurrence in the mouse_buttons table. The provided value must be numeric.',
+                    'rating' => 'Shows all mice having an average rating equal to or higher than the value provided. The provided value must be numeric.'
                 ],
                 '/mice/{mouse_id}' => 'Returns a single mouse by its ID.',
-                '/mice/{mouse_id}/buttons' => [],
-                '/layouts' => ''
+                '/mice/{mouse_id}/buttons' => [
+                    'name' => 'Shows buttons similar to the provided name.',
+                    'programmable' => 'Filter a button based on whether it is programmable. A true value is either  "1", "true", "on" or "yes", and a false value is either "0", "false", "off" or "no".'
+                ],
+                '/layouts' => 'Returns all layouts with no supported filters.',
+                '/layouts/{layout_id}' => 'Returns a single layout by its ID.',
+                '/layouts/{layout_id}/keyboards' => [
+                    'switch_type' => '',
+                    'lower_price_limit' => 'Must also be accompanied by an upper_price_limit filter. Shows all keyboard layouts whose layout\'s prices exist between the provided prices. The provided value must be numerical.',
+                    'upper_price_limit' => 'Must also be accompanied by a lower_price_limit filter. Shows all keyboard layouts whose layout\'s prices exist between the provided prices. The provided value must be numerical.',
+                    'connectivity' => 'Filter keyboards by their connection type, i.e., wired, wireless, or both.'
+                ],
+                '/layouts/{layout_id}/keycap-sets' => [
+                    'material' => 'Filters layout keycap sets by their material.',
+                    'profile' => 'Filters layout keycap sets by their profile.',
+                    'manufacturer' => 'Filters layout keycap sets by their manufacturer.',
+                    'price_maximum' => 'Shows all the keycap sets bellow the provided price. The provided value must be numeric.'
+                ]
             ]
         );
 
