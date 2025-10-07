@@ -8,7 +8,6 @@ use App\Exceptions\HttpInvalidParameterValueException;
 use App\Exceptions\HttpRangeFilterException;
 use App\Helpers\Core\PDOService;
 use Psr\Http\Message\ServerRequestInterface as Request;
-use Slim\Exception\HttpBadRequestException;
 
 class KeyboardsModel extends BaseModel
 {
@@ -17,10 +16,21 @@ class KeyboardsModel extends BaseModel
         parent::__construct($pdo);
     }
 
+    /**
+     * Queries database (table keyboards) for all the keyboards
+     * and applies the provided filters using WHERE and other clauses
+     * @param array $filters The filters to be applied to the query
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @throws \App\Exceptions\HttpInvalidParameterException If a provided query string parameter is not supported
+     * @throws \App\Exceptions\HttpInvalidParameterValueException If the provided parameter value is unsupported (i.e., switch_type=pink)
+     * @throws \App\Exceptions\HttpRangeFilterException If the user supplies an upper range limit, but not a lower, and vice-versa
+     * @throws \App\Exceptions\HttpInvalidDateException If the user supplies a date in an invalid format (valid is YYYY-mm-dd)
+     * @return array The paginated data
+     */
     public function getKeyboards(array $filters, Request $request): array
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['name', 'connectivity', 'switch_type', 'hotswappable', 'weight_maximum', 'released_before', 'released_after', 'firmware_type'];
+        $valid_filters = ['connectivity', 'switch_type', 'hotswappable', 'weight_maximum', 'released_before', 'released_after', 'firmware_type', 'page', 'limit'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);
@@ -29,10 +39,6 @@ class KeyboardsModel extends BaseModel
         $args = [];
         $sql = " SELECT * FROM keyboards JOIN switches ON keyboards.switch_id = switches.switch_id JOIN pcbs ON keyboards.keyboard_id = pcbs.keyboard_id WHERE 1 ";
 
-        if (!empty($filters['name'])) {
-            $sql .= " AND keyboards.name LIKE CONCAT('%', :keyboards_name, '%') ";
-            $args['keyboards_name'] = $filters['name'];
-        }
         if (!empty($filters['connectivity'])) {
             // make sure that the connectivity type is either wired, wireless, or both
             $allowedConnectivity = ['wired', 'wireless', 'both'];
@@ -98,6 +104,11 @@ class KeyboardsModel extends BaseModel
         return $this->paginate($sql, $args);
     }
 
+    /**
+     * Queries the database to find a single keyboard with the provided ID
+     * @param int $keyboard_id The ID to search for
+     * @return mixed The single keyboard found
+     */
     public function findKeyboardById(int $keyboard_id): mixed
     {
         $sql = " SELECT * FROM keyboards WHERE keyboard_id = :keyboard_id ";
@@ -106,10 +117,21 @@ class KeyboardsModel extends BaseModel
         return $keyboard;
     }
 
+    /**
+     * Queries the database (table keyboards) for all keyboards belonging to
+     * a layout and applies the provided filters using WHERE and other clauses
+     * @param int $layout_id The ID of the layout whose keyboards need querying
+     * @param array $filters The filters to apply to the query from the query string
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @throws \App\Exceptions\HttpInvalidParameterException If a provided query string parameter is not supported (i.e., name)
+     * @throws \App\Exceptions\HttpRangeFilterException If the user supplies an upper range limit, but not a lower, and vice-versa
+     * @throws \App\Exceptions\HttpInvalidParameterValueException If the user supplies a date in an invalid format
+     * @return array The paginated data
+     */
     public function findKeyboardByLayoutId(int $layout_id, array $filters, Request $request): array
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['switch_type', 'lower_price_limit', 'upper_price_limit', 'connectivity'];
+        $valid_filters = ['switch_type', 'lower_price_limit', 'upper_price_limit', 'connectivity', 'page', 'limit'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);

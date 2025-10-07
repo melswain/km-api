@@ -12,6 +12,14 @@ class KeyboardsController extends BaseController
 {
     public function __construct(private KeyboardsModel $keyboards_model) {}
 
+    /**
+     * Handles the get keyboards request and processes the filters
+     * (including pagination filters)
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @param \Psr\Http\Message\ResponseInterface $response The incoming server-side http response
+     * @throws \App\Exceptions\HttpPaginationException If the provided pagination values or not numeric, an error is thrown
+     * @return Response The encoded response to be sent to the user
+     */
     public function handleGetKeyboards(Request $request, Response $response): Response
     {
         $filters = $request->getQueryParams();
@@ -31,9 +39,9 @@ class KeyboardsController extends BaseController
 
     /**
      * Route to get a keyboard by its id (GET /keyboards/{keyboard_id})
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Psr\Http\Message\ResponseInterface $response
-     * @return void
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @param \Psr\Http\Message\ResponseInterface $response The incoming server-side http response
+     * @return Response The encoded response to be sent to the user
      */
     public function handleGetKeyboardById(Request $request, Response $response, array $uri_args): Response
     {

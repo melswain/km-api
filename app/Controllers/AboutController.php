@@ -17,8 +17,8 @@ class AboutController extends BaseController
      * Displays information about the web service
      * Includes all the exposed resources and what filters can be used on them
      * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
-     * @param \Psr\Http\Message\ResponseInterface $response the incoming server-side http response
-     * @return Response the encoded response to be sent to the user
+     * @param \Psr\Http\Message\ResponseInterface $response The incoming server-side http response
+     * @return Response The encoded response to be sent to the user
      */
     public function handleAboutWebService(Request $request, Response $response): Response
     {

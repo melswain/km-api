@@ -13,6 +13,13 @@ class MiceController extends BaseController
 {
     public function __construct(private MiceModel $mice_model, private ButtonsModel $buttons_model) {}
 
+    /**
+     * Handles the get mice request and processes the filters, including pagination
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @param \Psr\Http\Message\ResponseInterface $response The incoming server-side http response
+     * @throws \App\Exceptions\HttpPaginationException If the provided pagination values are not numeric
+     * @return Response The encoded JSON response to be sent to the user
+     */
     public function handleGetMice(Request $request, Response $response): Response
     {
         $filters = $request->getQueryParams();
@@ -31,10 +38,12 @@ class MiceController extends BaseController
     }
 
     /**
-     * Route to get a mouse by its id (GET /mice/{mouse_id})
-     * @param \Psr\Http\Message\ServerRequestInterface $request
-     * @param \Psr\Http\Message\ResponseInterface $response
-     * @return void
+     * Route to get a mouse by its ID
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @param \Psr\Http\Message\ResponseInterface $response The incoming server-side http response
+     * @param array $uri_args The URI arguments, in this case, the layout's ID
+     * @throws \App\Exceptions\HttpInvalidIdException If the provided layout ID is invalid (i.e., it does not exist)
+     * @return Response The encoded response to be sent to the user
      */
     public function handleGetMouseById(Request $request, Response $response, array $uri_args): Response
     {
@@ -48,6 +57,15 @@ class MiceController extends BaseController
         return $this->renderJson($response, $mouse);
     }
 
+    /**
+     * Handles the get buttons of a mouse and handles its filters, including pagination
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @param \Psr\Http\Message\ResponseInterface $response The incoming server-side http response
+     * @param array $uri_args The URI arguments; in this case, the layout's ID
+     * @throws \App\Exceptions\HttpInvalidIdException If the provided layout ID is invalid
+     * @throws \App\Exceptions\HttpPaginationException If the provided pagination values are not numeric
+     * @return Response The encoded response to be sent to the user
+     */
     public function handleGetButtonMouseById(Request $request, Response $response, array $uri_args): Response
     {
         $mouse_id = $uri_args['mouse_id'];
@@ -59,9 +77,19 @@ class MiceController extends BaseController
             throw new HttpInvalidIdException($request);
         }
 
-        // Fetch switches for this vendor
-        $switches = $this->buttons_model->findButtonsByMouseId($mouse_id, $filters, $request);
+        // Handle pagination
+        $current_page = !empty($filters['page']) ? $filters['page'] : 1;
+        $records_per_page = !empty($filters['limit']) ? $filters['limit'] : 10;
 
-        return $this->renderJson($response, $switches);
+        if (!is_numeric($current_page) || !is_numeric($records_per_page)) {
+            throw new HttpPaginationException($request);
+        }
+
+        $this->buttons_model->setPaginationOptions($current_page, $records_per_page);
+
+        // Fetch buttons for this mouse
+        $buttons = $this->buttons_model->findButtonsByMouseId($mouse_id, $filters, $request);
+
+        return $this->renderJson($response, $buttons);
     }
 }

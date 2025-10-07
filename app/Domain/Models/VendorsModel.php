@@ -17,10 +17,20 @@ class VendorsModel extends BaseModel
         parent::__construct($pdo);
     }
 
+    /**
+     * Queries database (table vendors) for all the vendors and applies the
+     * provided filters using WHERE and other clauses
+     * @param array $filters The filters to be applied to the query
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @throws \App\Exceptions\HttpInvalidParameterException If a provided query string parameter is not supported
+     * @throws \App\Exceptions\HttpInvalidParameterValueException If the provided parameter value is unsupported (i.e., switch_type=pink)
+     * @throws \App\Exceptions\HttpRangeFilterException If the user supplies an upper range limit, but not a lower, and vice-versa
+     * @return array The paginated data
+     */
     public function getVendors(array $filters, Request $request): array // using "array" as the datatype is called "hint typing"
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['name', 'country', 'founded_after', 'founded_before', 'keyboards_count', 'lower_price_limit', 'upper_price_limit'];
+        $valid_filters = ['name', 'country', 'founded_after', 'founded_before', 'keyboards_count', 'lower_price_limit', 'upper_price_limit', 'page', 'limit'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);
@@ -82,6 +92,11 @@ class VendorsModel extends BaseModel
         return $this->paginate($sql, $args);
     }
 
+    /**
+     * Queries the database to find a single vendor with the provided ID
+     * @param int $vendor_id The ID to search for
+     * @return mixed The single vendor found
+     */
     public function findVendorById(int $vendor_id): mixed
     {
         $sql = " SELECT * FROM vendors WHERE vendor_id = :vendor_id ";

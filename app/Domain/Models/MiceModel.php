@@ -17,10 +17,20 @@ class MiceModel extends BaseModel
         parent::__construct($pdo);
     }
 
+    /**
+     * Queries database (table mice) for all the mice and applis the provided
+     * filters using WHERE and other clauses
+     * @param array $filters The filters to be applied to the query
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @throws \App\Exceptions\HttpInvalidParameterException If a provided parameter is not supported
+     * @throws \App\Exceptions\HttpInvalidParameterValueException If the provided parameter value is unsupported
+     * @throws \App\Exceptions\HttpRangeFilterException If the user supplies an upper range limit, but not a lower, and vice-versa
+     * @return array The paginated data
+     */
     public function getMice(array $filters, Request $request): array
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['name', 'polling_rate', 'connection', 'weight_minimum', 'weight_maximum', 'lower_price_limit', 'upper_price_limit', 'button_count', 'rating'];
+        $valid_filters = ['name', 'polling_rate', 'connection', 'weight_minimum', 'weight_maximum', 'lower_price_limit', 'upper_price_limit', 'button_count', 'rating', 'page', 'limit'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);
@@ -107,6 +117,11 @@ class MiceModel extends BaseModel
         return $this->paginate($sql, $args);
     }
 
+    /**
+     * Queries the database to find a single mouse with the provided ID
+     * @param int $mouse_id The ID to search for
+     * @return mixed The single mouse found
+     */
     public function findMouseById(int $mouse_id): mixed
     {
         $sql = " SELECT * FROM mice WHERE mouse_id = :mouse_id ";

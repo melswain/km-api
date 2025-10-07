@@ -18,9 +18,19 @@ class KeycapsModel extends BaseModel
         parent::__construct($pdo);
     }
 
+    /**
+     * Queries database (table keycap_sets) for the keycaps of a layout
+     * and applies the provided filters using WHERE and other clauses
+     * @param mixed $layout_id The ID of the mouse whose buttons need querying
+     * @param array $filters The filters to apply to the query from the query string
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @throws \App\Exceptions\HttpInvalidParameterException If a provided query string parameter is not supported
+     * @throws \App\Exceptions\HttpInvalidParameterValueException If the provided parameter value is unsupported (i.e., switch_type=pink)
+     * @return array The paginated data
+     */
     public function findKeycapSetByLayoutId($layout_id, array $filters, Request $request): array
     {
-        $valid_filters = ['name', 'material', 'profile', 'manufacturer', 'price_maximum'];
+        $valid_filters = ['material', 'profile', 'manufacturer', 'price_maximum', 'page', 'limit'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);
@@ -34,10 +44,6 @@ class KeycapsModel extends BaseModel
         $args['layout_id'] = $layout_id;
 
 
-        if (!empty($filters['name'])) {
-            $sql .= " AND keycap_sets.name LIKE CONCAT('%', :keycap_name, '%') ";
-            $args['keycap_name'] = $filters['name'];
-        }
         if (!empty($filters['material'])) {
             $sql .= " AND keycap_sets.material LIKE CONCAT('%', :keycap_material, '%') ";
             $args['keycap_material'] = $filters['material'];

@@ -16,10 +16,21 @@ class SwitchesModel extends BaseModel
         parent::__construct($pdo);
     }
 
+    /**
+     * Queries the database for all switches belonging to a vendor and applies the provided filters using WHERE and other clauses
+     * @param int $vendor_id The ID of the vendor whose switches need querying
+     * @param array $filters The filters to apply to the query from the query string
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @throws \App\Exceptions\HttpInvalidParameterException If a provided query string parameter is not supported (i.e., name)
+     * @throws \App\Exceptions\HttpInvalidParameterValueException If the user supplies a date in an invalid format
+     * @throws \App\Exceptions\HttpRangeFilterException If the user supplies an upper range limit, but not a lower, and vice-versa
+     * @throws \App\Exceptions\HttpInvalidDateException If the user supplies a date in an invalid format (valid is YYYY-mm-dd)
+     * @return array The paginated data
+     */
     public function findSwitchesByVendorId(int $vendor_id, array $filters, Request $request): mixed
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['type', 'lower_actuation_force_limit', 'upper_actuation_force_limit', 'lower_travel_distance_limit', 'upper_travel_distance_limit', 'lifespan_minimum', 'released_after', 'released_before'];
+        $valid_filters = ['type', 'lower_actuation_force_limit', 'upper_actuation_force_limit', 'lower_travel_distance_limit', 'upper_travel_distance_limit', 'lifespan_minimum', 'released_after', 'released_before', 'page', 'limit'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);

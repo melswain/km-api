@@ -350,12 +350,14 @@ abstract class BaseModel
         $this->records_per_page = $records_per_page;
     }
 
-    public function validateDate($date, $format = 'Y-m-d') {
+    public function validateDate($date, $format = 'Y-m-d')
+    {
         $dt = DateTime::createFromFormat($format, $date);
         return $dt && strtolower($dt->format($format)) === strtolower($date);
     }
 
-    public function validateYear($year): bool {
+    public function validateYear($year): bool
+    {
         return is_numeric($year) &&
             strlen((string)$year) === 4 &&
             $year >= 1900 &&

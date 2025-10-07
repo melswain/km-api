@@ -13,10 +13,19 @@ class ButtonsModel extends BaseModel
         parent::__construct($pdo);
     }
 
+    /**
+     * Queries database (table mouse_buttons) for the buttons of a mouse
+     * and applies the provided filters using WHERE and other clauses
+     * @param int $mouse_id The ID of the mouse whose buttons need querying
+     * @param array $filters The filters to apply to the query from the query string
+     * @param \Psr\Http\Message\ServerRequestInterface $request The server-side http request
+     * @throws \App\Exceptions\HttpInvalidParameterException If a provided query string parameter is not supported
+     * @return array The paginated data
+     */
     public function findButtonsByMouseId(int $mouse_id, array $filters, Request $request): mixed
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['name', 'programmable'];
+        $valid_filters = ['name', 'programmable', 'page', 'limit'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);
