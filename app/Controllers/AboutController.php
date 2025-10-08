@@ -76,7 +76,7 @@ class AboutController extends BaseController
                 '/layouts' => 'Returns all layouts with no supported filters.',
                 '/layouts/{layout_id}' => 'Returns a single layout by its ID.',
                 '/layouts/{layout_id}/keyboards' => [
-                    'switch_type' => '',
+                    'switch_type' => 'Filter layout\'s keyboards by their switch type, i.e., linear, tactile, or clicky.',
                     'lower_price_limit' => 'Must also be accompanied by an upper_price_limit filter. Shows all keyboard layouts whose layout\'s prices exist between the provided prices. The provided value must be numerical.',
                     'upper_price_limit' => 'Must also be accompanied by a lower_price_limit filter. Shows all keyboard layouts whose layout\'s prices exist between the provided prices. The provided value must be numerical.',
                     'connectivity' => 'Filter keyboards by their connection type, i.e., wired, wireless, or both.'
