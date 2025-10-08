@@ -40,16 +40,16 @@ class VendorsModel extends BaseModel
         $sql = " SELECT DISTINCT vendors.* FROM vendors LEFT JOIN keyboards ON keyboards.vendor_id = vendors.vendor_id WHERE 1 ";
 
         if (!empty($filters['name'])) {
-            $sql .= " AND name LIKE CONCAT('%', :vendors_name, '%') ";
+            $sql .= " AND vendors.name LIKE CONCAT('%', :vendors_name, '%') ";
             $args['vendors_name'] = $filters['name'];
         }
         if (!empty($filters['country'])) {
-            $sql .= " AND country LIKE CONCAT('%', :vendors_country, '%') ";
+            $sql .= " AND vendors.country LIKE CONCAT('%', :vendors_country, '%') ";
             $args['vendors_country'] = $filters['country'];
         }
         if (!empty($filters['founded_after'])) {
             if ($this->validateYear($filters['founded_after'])) {
-                $sql .= " AND founded_year > :vendors_founded_after ";
+                $sql .= " AND vendors.founded_year > :vendors_founded_after ";
                 $args["vendors_founded_after"] = $filters['founded_after'];
             } else {
                 throw new HttpInvalidParameterValueException($request);
@@ -57,7 +57,7 @@ class VendorsModel extends BaseModel
         }
         if (!empty($filters['founded_before'])) {
             if ($this->validateYear($filters['founded_after'])) {
-                $sql .= " AND founded_year < :vendors_founded_before ";
+                $sql .= " AND vendors.founded_year < :vendors_founded_before ";
                 $args["vendors_founded_before"] = $filters['founded_before'];
             } else {
                 throw new HttpInvalidParameterValueException($request);

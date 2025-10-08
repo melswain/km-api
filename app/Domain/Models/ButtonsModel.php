@@ -36,14 +36,14 @@ class ButtonsModel extends BaseModel
         $args['mouse_id'] = $mouse_id;
 
         if (!empty($filters['name'])) {
-            $sql .= " AND name LIKE CONCAT('%', :buttons_name, '%') ";
+            $sql .= " AND mouse_buttons.name LIKE CONCAT('%', :buttons_name, '%') ";
             $args['buttons_name'] = $filters['name'];
         }
         if (!empty($filters['programmable'])) {
             // Input either true or false, and it will search using boolean integers (0 or 1)
             // https://www.php.net/manual/en/filter.constants
             $programmable = filter_var($filters['programmable'], FILTER_VALIDATE_BOOLEAN);
-            $sql .= " AND programmable = :programmable ";
+            $sql .= " AND mouse_buttons.programmable = :programmable ";
             $args['programmable'] = $programmable ? 1 : 0;
         }
 
