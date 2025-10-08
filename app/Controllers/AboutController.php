@@ -36,6 +36,7 @@ class AboutController extends BaseController
                     'keyboards_count' => 'Filters vendors by the available keyboards that they provide. Will display any vendors who have a keyboard count equivalent to the one provided. The provided value must be numerical.',
                     'lower_price_limit' => 'Must also be accompanied by an upper_price_limit filter. Shows all vendors whose keyboards\'s prices exist between the provided prices. The provided value must be numerical.',
                     'upper_price_limit' => 'Must also be accompanied by a lower_price_limit filter. Shows all vendors whose keyboards\'s prices exist between the provided prices. The provided value must be numerical.',
+                    'order_by' => 'Supports ascending sorting by any column in the vendors table (vendor_id, name, country, founded_year, website, headquarters).'
                 ],
                 '/vendors/{vendor_id}' => 'Returns a single vendor by its ID.',
                 '/vendors/{vendor_id}/switches' => [
@@ -55,7 +56,8 @@ class AboutController extends BaseController
                     'weight_maximum' => 'Filter the keyboards by a maximum weight, in grams. The provided value must be numeric.',
                     'released_after' => 'Must also be accompanied by a released_before value. The provided value must be a date in the form of YYYY-mm-dd. Specifies a range for all movies to be released between.',
                     'released_before' => 'Must also be accompanied by a released_after value. The provided value must be a date in the form of YYYY-mm-dd. Specifies a range for all movies to be released between.',
-                    'firmware_type' => 'Filter keyboards by their PCB firmware type, i.e., QMK or proprietary.'
+                    'firmware_type' => 'Filter keyboards by their PCB firmware type, i.e., QMK or proprietary.',
+                    'order_by' => 'Supports ascending sorting by any column in the keyboards table (vendor_id, switch_id, layout_id, name, release_date, price, connectivity, hot_swappable, case_material, weight).'
                 ],
                 '/keyboards/{keyboard_id}' => 'Returns a single keyboard by its ID.',
                 '/mice' => [

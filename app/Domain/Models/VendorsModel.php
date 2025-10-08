@@ -30,7 +30,7 @@ class VendorsModel extends BaseModel
     public function getVendors(array $filters, Request $request): array // using "array" as the datatype is called "hint typing"
     {
         // Check for invalid filters (https://www.php.net/manual/en/function.array-diff.php)
-        $valid_filters = ['name', 'country', 'founded_after', 'founded_before', 'keyboards_count', 'lower_price_limit', 'upper_price_limit', 'page', 'limit'];
+        $valid_filters = ['name', 'country', 'founded_after', 'founded_before', 'keyboards_count', 'lower_price_limit', 'upper_price_limit', 'page', 'limit', 'order_by'];
         $invalid_filters = array_diff(array_keys($filters), $valid_filters);
         if (!empty($invalid_filters)) {
             throw new HttpInvalidParameterException($request);
@@ -87,6 +87,16 @@ class VendorsModel extends BaseModel
         } else if (!empty($filters['upper_price_limit'])) {
             // Using an upper price limit requires a lower price limit
             throw new HttpRangeFilterException($request);
+        }
+        if (!empty($filters['order_by'])) {
+            // the user can order by any column in vendors
+            $allowedTypes = ['vendor_id', 'name', 'country', 'founded_year', 'website', 'headquarters'];
+            if (!in_array($filters['order_by'], $allowedTypes, true)) {
+                throw new HttpInvalidParameterValueException($request);
+            }
+
+            $sql .= " ORDER BY :order_by_type ASC ";
+            $args['order_by_type'] = $filters['order_by'];
         }
 
         return $this->paginate($sql, $args);

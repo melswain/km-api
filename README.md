@@ -96,9 +96,9 @@ Returns a single layout by its ID.
 
 ## ❌ Errors
 
-- HttpInvalidDateException : thrown when the inputted date does not match the format YYYY-mm-dd
-- HttpInvalidIdException : thrown when the provided id of a resource is invalid or does not exist
-- HttpInvalidParameterException : thrown when a query parameter does not exist
-- HttpInvalidParameterValueException : thrown when a query parameter's value is invalid and does not match the value options
-- HttpPaginationException : thrown when the value inputted for pagination is invalid, like a string
-- HttpRangeFilterException : thrown when the value for an upper limit is provided but not the lower, and vice-versa
+- `HttpInvalidDateException` : thrown when the inputted date does not match the format YYYY-mm-dd
+- `HttpInvalidIdException` : thrown when the provided id of a resource is invalid or does not exist
+- `HttpInvalidParameterException` : thrown when a query parameter does not exist
+- `HttpInvalidParameterValueException` : thrown when a query parameter's value is invalid and does not match the value options
+- `HttpPaginationException` : thrown when the value inputted for pagination is invalid, like a string
+- `HttpRangeFilterException` : thrown when the value for an upper limit is provided but not the lower, and vice-versa
