@@ -22,6 +22,7 @@ This web service provides information about keyboards and mice available on the 
 - `keyboards_count`: Filters vendors by the number of keyboards they provide. Value must be numeric.
 - `lower_price_limit`: Must be used with `upper_price_limit`. Filters vendors by keyboard price range. Value must be numeric.
 - `upper_price_limit`: Must be used with `lower_price_limit`. Filters vendors by keyboard price range. Value must be numeric.
+- `order_by`: Supports ascending sorting by any column in the vendors table (vendor_id, name, country, founded_year, website, headquarters).
 
 ### `/vendors/{vendor_id}`
 
@@ -47,6 +48,7 @@ Returns a single vendor by its ID.
 - `released_after`: Must be used with `released_before`. Date format: `YYYY-mm-dd`.
 - `released_before`: Must be used with `released_after`. Date format: `YYYY-mm-dd`.
 - `firmware_type`: Filter by PCB firmware type (QMK or proprietary).
+- `order_by`: Supports ascending sorting by any column in the keyboards table (vendor_id, switch_id, layout_id, name, release_date, price, connectivity, hot_swappable, case_material, weight).
 
 ### `/keyboards/{keyboard_id}`
 
@@ -96,9 +98,9 @@ Returns a single layout by its ID.
 
 ## ❌ Errors
 
-- `HttpInvalidDateException` : thrown when the inputted date does not match the format YYYY-mm-dd
-- `HttpInvalidIdException` : thrown when the provided id of a resource is invalid or does not exist
-- `HttpInvalidParameterException` : thrown when a query parameter does not exist
-- `HttpInvalidParameterValueException` : thrown when a query parameter's value is invalid and does not match the value options
-- `HttpPaginationException` : thrown when the value inputted for pagination is invalid, like a string
-- `HttpRangeFilterException` : thrown when the value for an upper limit is provided but not the lower, and vice-versa
+- `HttpInvalidDateException`: thrown when the inputted date does not match the format YYYY-mm-dd
+- `HttpInvalidIdException`: thrown when the provided id of a resource is invalid or does not exist
+- `HttpInvalidParameterException`: thrown when a query parameter does not exist
+- `HttpInvalidParameterValueException`: thrown when a query parameter's value is invalid and does not match the value options
+- `HttpPaginationException`: thrown when the value inputted for pagination is invalid, like a string
+- `HttpRangeFilterException`: thrown when the value for an upper limit is provided but not the lower, and vice-versa
